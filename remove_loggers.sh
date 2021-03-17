@@ -3,11 +3,11 @@ CLUSTER='3'
 ENV='PROD'
 #-- Prepare the file environment
 FILE="c$CLUSTER/"
-if [ "$ENV" == "PROD" ]; then
-    FILE="c$CLUSTER/logs_prod.txt"
-else
-    FILE="c$CLUSTER/logs_qa.txt"
-fi
+#-- Prepare all environment folders
+clusterArray=('c1' 'c2' 'c3' 'c5' 'c7')
+#-- Prepare environment
+environmentArray=('prod' 'qa')
+
 printParams() {
    echo "$1, $2, $3, $4, $5, $6, $7, $8, $9"
 }
@@ -30,7 +30,7 @@ compareDates(){
          echo "Total hours:$abs"
          if (( $abs >= 2 )); then
             echo "Removing loggers..."            
-            sed -i "/_$1_,$2,@$3@&$4&?$5?+$6+:$7:/d" ../Jenkins/"$8"                                    
+            sed -i "/_$1_,$2,@$3@&$4&?$5?+$6+:$7:/d" ../Jenkins/Scripts/"$8"                                    
          fi         
       fi
    fi   
@@ -50,10 +50,17 @@ log_checker(){
       fi
       #printParams "$CLUSTER" "$ENV" "$CUSTOMER" "$RULESHEET" "$YEAR" "$MONTH" "$DAY" "$HOUR" "$MIN"       
 
-   done < ../Jenkins/$1
+   done < ../Jenkins/Scripts/$1
 }
 
 #-- Call the log checker for every single cluster and environment
-log_checker "$FILE"
-
+for cluster in "${clusterArray[@]}"
+do      
+   for env in "${environmentArray[@]}"
+   do
+      FILE="$cluster/logs_$env.txt"
+      log_checker "$FILE"
+   done
+done
+#
 
