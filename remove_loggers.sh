@@ -1,4 +1,13 @@
 #!/bin/bash
+CLUSTER='3'
+ENV='PROD'
+#-- Prepare the file environment
+FILE="c$CLUSTER/"
+if [ "$ENV" == "PROD" ]; then
+    FILE="c$CLUSTER/logs_prod.txt"
+else
+    FILE="c$CLUSTER/logs_qa.txt"
+fi
 printParams() {
    echo "$1, $2, $3, $4, $5, $6, $7, $8, $9"
 }
@@ -13,36 +22,38 @@ compareDates(){
    CMONTH=`date '+%m'`
    CDAY=`date '+%d'`
    CHOUR=`date '+%H'`
-   CMINUTE=`date '+%M'`
-   if [[ "$CYEAR" = "$5"  &&  "$CMONTH" = "$6" ]]; then
-      if [ "$CDAY" = "$7" ]; then
-         diff=$(($CHOUR-$8))
+   CMINUTE=`date '+%M'`  
+   if [[ "$CYEAR" = "$3"  &&  "$CMONTH" = "$4" ]]; then
+      if [ "$CDAY" = "$5" ]; then
+         diff=$(($CHOUR-$6))
          abs=$(echo "sqrt($diff*$diff)" | bc)
          echo "Total hours:$abs"
-         if (( $abs >= 12 )); then
+         if (( $abs >= 2 )); then
             echo "Removing loggers..."            
-            sed -i "s/@$5@&$6&?$7?+$8+:$9:/ /" ../Jenkins/log_stack
-            #-- TODO: Call the remove logger
+            sed -i "/_$1_,$2,@$3@&$4&?$5?+$6+:$7:/d" ../Jenkins/"$8"                                    
          fi         
       fi
-   fi
-   #printParams "$CYEAR" "$CMONTH" "$CDAY" "$CHOUR" "$CMINUTE"
+   fi   
 }
 
-while read line; do
-   if [ `strindex "$line" "@"` -ge 0 ]; then
-      CLUSTER=$( echo $line | cut -d'*' -f 2)
-      ENV=$(echo $line | cut -d'/' -f 2)
-      CUSTOMER=$(echo $line | cut -d'-' -f 2)
-      RULESHEET=$(echo $line | cut -d',' -f 2)
-      YEAR=$(echo $line | cut -d'@' -f 2)
-      MONTH=$(echo $line | cut -d'&' -f 2)
-      DAY=$(echo $line | cut -d'?' -f 2)
-      HOUR=$(echo $line | cut -d'+' -f 2)
-      MIN=$(echo $line | cut -d':' -f 2)
-      compareDates "$CLUSTER" "$ENV" "$CUSTOMER" "$RULESHEET" "$YEAR" "$MONTH" "$DAY" "$HOUR" "$MIN"
-   fi
-   #printParams "$CLUSTER" "$ENV" "$CUSTOMER" "$RULESHEET" "$YEAR" "$MONTH" "$DAY" "$HOUR" "$MIN"       
+log_checker(){
+   while read line; do
+      if [ `strindex "$line" "@"` -ge 0 ]; then
+         CUSTOMER=$(echo $line | cut -d'_' -f 2)
+         RULESHEET=$(echo $line | cut -d',' -f 2)
+         YEAR=$(echo $line | cut -d'@' -f 2)
+         MONTH=$(echo $line | cut -d'&' -f 2)
+         DAY=$(echo $line | cut -d'?' -f 2)
+         HOUR=$(echo $line | cut -d'+' -f 2)
+         MIN=$(echo $line | cut -d':' -f 2)
+         compareDates "$CUSTOMER" "$RULESHEET" "$YEAR" "$MONTH" "$DAY" "$HOUR" "$MIN" "$1"
+      fi
+      #printParams "$CLUSTER" "$ENV" "$CUSTOMER" "$RULESHEET" "$YEAR" "$MONTH" "$DAY" "$HOUR" "$MIN"       
 
-done < ../Jenkins/log_stack
+   done < ../Jenkins/$1
+}
+
+#-- Call the log checker for every single cluster and environment
+log_checker "$FILE"
+
 
