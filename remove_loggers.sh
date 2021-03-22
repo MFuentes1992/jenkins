@@ -17,7 +17,7 @@ strindex() {
   [[ "$x" = "$1" ]] && echo -1 || echo "${#x}"
 }
 
-compareDates(){
+log_removal(){
    CYEAR=`date '+%Y'`
    CMONTH=`date '+%m'`
    CDAY=`date '+%d'`
@@ -46,7 +46,7 @@ log_checker(){
          DAY=$(echo $line | cut -d'?' -f 2)
          HOUR=$(echo $line | cut -d'+' -f 2)
          MIN=$(echo $line | cut -d':' -f 2)
-         compareDates "$CUSTOMER" "$RULESHEET" "$YEAR" "$MONTH" "$DAY" "$HOUR" "$MIN" "$1"
+         log_removal "$CUSTOMER" "$RULESHEET" "$YEAR" "$MONTH" "$DAY" "$HOUR" "$MIN" "$1"
       fi
       #printParams "$CLUSTER" "$ENV" "$CUSTOMER" "$RULESHEET" "$YEAR" "$MONTH" "$DAY" "$HOUR" "$MIN"       
 
