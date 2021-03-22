@@ -10,5 +10,5 @@ CHOUR=`date '+%H'`
 CMINUTE=`date '+%M'`
 FILE="c$CLUSTER/"
 FILE="c$CLUSTER/logs_$ENVIRONMENT.txt"
-printf "/%s/,%s,@%s@&%s&?%s?+%s+:%s:\n" "$CustomerID" "$RuleType" "$CYEAR" "$CMONTH" "$CDAY" "$CHOUR" "$CMINUTE" >> ../Jenkins/"$FILE"
+printf "_%s_,%s,@%s@&%s&?%s?+%s+:%s:\n" "$CustomerID" "$RuleType" "$CYEAR" "$CMONTH" "$CDAY" "$CHOUR" "$CMINUTE" >> ../Jenkins/"$FILE"
 #echo "\n*$CLUSTER*/$ENV/-$CUSTOMER-,$RULESHEET,%$CYEAR%&$CMONTH&+$CDAY+@$CHOUR@:$CMINUTE:" >> ../Jenkins/log_stack
